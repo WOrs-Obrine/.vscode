@@ -153,6 +153,9 @@
         /* 人形图标样式 */
         #figure-icon {
             position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 300px;
             height: 500px;
             background-image: url('http://scpsandboxcn.wikidot.com/local--files/collab:4ktime/blackus');
@@ -167,6 +170,9 @@
         /* 对话框样式 */
         #dialogue-box {
             position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 600px;
             background-color: rgba(0, 0, 0, 0.9);
             border: 2px solid white;
@@ -832,9 +838,8 @@
             
             // 按钮点击事件
             confirmButton.addEventListener('click', function() {
-                // 页面视口自动上移至内容开头位置
-                const contentWrapper = document.querySelector('.content-wrapper');
-                contentWrapper.scrollTop = 0;
+                // 跳转到指定网址
+                window.location.replace('https://scp-wiki-cn.wikidot.com/scp-3930');
             });
         }
         
@@ -943,93 +948,6 @@
                 }
             }
         }
-        
-        // 更新元素位置到父页面视口中心
-        function updateElementsPosition() {
-            // 尝试与父页面通信获取视口信息
-            try {
-                // 向父页面发送消息请求视口信息
-                window.parent.postMessage({ type: 'GET_VIEWPORT_INFO' }, '*');
-            } catch (error) {
-                // 跨域错误，使用iframe内部定位作为回退
-                fallbackPosition();
-            }
-        }
-        
-        // 回退定位方案：使用iframe内部中心定位
-        function fallbackPosition() {
-            const figureIcon = document.getElementById('figure-icon');
-            const dialogueBox = document.getElementById('dialogue-box');
-            
-            if (figureIcon) {
-                figureIcon.style.top = '50%';
-                figureIcon.style.left = '50%';
-                figureIcon.style.transform = 'translate(-50%, -50%)';
-            }
-            
-            if (dialogueBox) {
-                dialogueBox.style.top = '50%';
-                dialogueBox.style.left = '50%';
-                dialogueBox.style.transform = 'translate(-50%, -50%)';
-            }
-        }
-        
-        // 处理父页面返回的视口信息
-        function handleViewportInfo(event) {
-            if (event.data && event.data.type === 'VIEWPORT_INFO') {
-                const { scrollX, scrollY, clientWidth, clientHeight } = event.data;
-                const figureIcon = document.getElementById('figure-icon');
-                const dialogueBox = document.getElementById('dialogue-box');
-                
-                // 获取iframe在父页面中的位置
-                const iframeRect = window.frameElement.getBoundingClientRect();
-                
-                // 计算元素在iframe内的位置，使其显示在父页面视口中心
-                if (figureIcon) {
-                    const iconWidth = figureIcon.offsetWidth;
-                    const iconHeight = figureIcon.offsetHeight;
-                    
-                    // 计算父页面视口中心相对于iframe的位置
-                    const centerX = (clientWidth / 2) - iframeRect.left;
-                    const centerY = (clientHeight / 2) - iframeRect.top + scrollY;
-                    
-                    figureIcon.style.top = `${centerY - (iconHeight / 2)}px`;
-                    figureIcon.style.left = `${centerX - (iconWidth / 2)}px`;
-                    figureIcon.style.transform = 'none';
-                }
-                
-                if (dialogueBox) {
-                    const boxWidth = dialogueBox.offsetWidth;
-                    const boxHeight = dialogueBox.offsetHeight;
-                    
-                    // 计算父页面视口中心相对于iframe的位置
-                    const centerX = (clientWidth / 2) - iframeRect.left;
-                    const centerY = (clientHeight / 2) - iframeRect.top + scrollY;
-                    
-                    dialogueBox.style.top = `${centerY - (boxHeight / 2)}px`;
-                    dialogueBox.style.left = `${centerX - (boxWidth / 2)}px`;
-                    dialogueBox.style.transform = 'none';
-                }
-            }
-        }
-        
-        // 初始化定位功能
-        function initPositioning() {
-            // 添加事件监听器接收父页面消息
-            window.addEventListener('message', handleViewportInfo);
-            
-            // 初始定位
-            updateElementsPosition();
-            
-            // 定期更新定位（处理父页面滚动和大小变化）
-            setInterval(updateElementsPosition, 100);
-            
-            // 监听iframe大小变化
-            window.addEventListener('resize', updateElementsPosition);
-        }
-        
-        // 页面加载完成后初始化
-        window.addEventListener('load', initPositioning);
     </script>
 </body>
 </html>
