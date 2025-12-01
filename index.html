@@ -387,27 +387,29 @@
         document.getElementById('choice-button').addEventListener('click', function () {
             console.log('用户点击了做出选择按钮');
             
-            // 获取当前窗口的顶层元素
-            let fullscreenElement = document.documentElement;
-            
-            // 检查是否在iframe中
-            if (window.self !== window.top) {
-                // 如果在iframe中，尝试获取iframe元素本身
-                // 但由于同源策略限制，我们只能请求当前文档全屏
-                // 这会导致整个浏览器窗口全屏显示iframe内容
-                fullscreenElement = document.documentElement;
+            // 尝试请求全屏显示，但处理可能的权限错误
+            async function requestFullscreen() {
+                const fullscreenElement = document.documentElement;
+                
+                try {
+                    if (fullscreenElement.requestFullscreen) {
+                        await fullscreenElement.requestFullscreen();
+                    } else if (fullscreenElement.mozRequestFullScreen) {
+                        await fullscreenElement.mozRequestFullScreen();
+                    } else if (fullscreenElement.webkitRequestFullscreen) {
+                        await fullscreenElement.webkitRequestFullscreen();
+                    } else if (fullscreenElement.msRequestFullscreen) {
+                        await fullscreenElement.msRequestFullscreen();
+                    }
+                    console.log('全屏请求成功');
+                } catch (error) {
+                    console.error('全屏请求失败:', error);
+                    // 全屏请求失败，继续执行动画，不影响用户体验
+                }
             }
             
-            // 请求全屏显示
-            if (fullscreenElement.requestFullscreen) {
-                fullscreenElement.requestFullscreen();
-            } else if (fullscreenElement.mozRequestFullScreen) {
-                fullscreenElement.mozRequestFullScreen();
-            } else if (fullscreenElement.webkitRequestFullscreen) {
-                fullscreenElement.webkitRequestFullscreen();
-            } else if (fullscreenElement.msRequestFullscreen) {
-                fullscreenElement.msRequestFullscreen();
-            }
+            // 调用全屏请求函数
+            requestFullscreen();
             
             const contentArea = document.querySelector('.wikidot-content');
             const contentWrapper = document.querySelector('.content-wrapper');
