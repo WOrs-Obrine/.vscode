@@ -13,6 +13,10 @@
             color: white;
             height: 100%;
             overflow: hidden;
+            /* 确保页面在iframe中占据整个空间 */
+            width: 100%;
+            border: none;
+            box-sizing: border-box;
         }
         
         .wikidot-content {
@@ -235,6 +239,14 @@
             pointer-events: none;
         }
         
+        /* iframe适配样式 */
+        iframe {
+            display: block;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+        
         /* 最终文字容器 */
         .final-text-container {
             width: 100%;
@@ -311,6 +323,80 @@
             opacity: 0;
             transition: opacity 1s ease;
         }
+        
+        /* 按钮响应式设计 */
+        @media (max-width: 768px) {
+            .choice-button {
+                width: 150px;
+                height: 45px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .choice-button {
+                width: 120px;
+                height: 40px;
+                font-size: 14px;
+            }
+        }
+        
+        /* 文本容器响应式设计 */
+        @media (max-width: 768px) {
+            .wikidot-content {
+                padding: 10px;
+            }
+            
+            .content-wrapper {
+                max-height: calc(100vh - 20px);
+            }
+            
+            .text-section {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+        }
+        
+        /* 对话框响应式设计 */
+        @media (max-width: 768px) {
+            #dialogue-box {
+                width: 90%;
+                max-width: 400px;
+                font-size: 14px;
+            }
+        }
+        
+        /* 人形图标响应式设计
+        @media (max-width: 768px) {
+            #figure-icon {
+                width: 200px;
+                height: 350px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #figure-icon {
+                width: 150px;
+                height: 250px;
+            }
+        } */
+        
+        /* 最终文字容器响应式设计 */
+        @media (max-width: 768px) {
+            .final-text-container {
+                padding: 0 10px;
+            }
+            
+            .final-text-section {
+                font-size: 12px;
+            }
+        }
+        
+        /* 优化触摸体验 */
+        .choice-button {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
     </style>
 </head>
 
@@ -336,6 +422,19 @@
 
     <!-- 页面级JavaScript -->
     <script type="text/javascript">
+        // 处理跨域通信
+        function sendMessageToParent(message) {
+            try {
+                window.parent.postMessage(message, '*');
+            } catch (e) {
+                console.log('无法发送消息到父页面:', e);
+            }
+        }
+        
+        // 监听来自父页面的消息
+        window.addEventListener('message', function(event) {
+            console.log('收到来自父页面的消息:', event.data);
+        });
         // 获取人形图标元素和对话框元素
         const figureIcon = document.getElementById('figure-icon');
         const dialogueBox = document.getElementById('dialogue-box');
@@ -354,9 +453,61 @@
             return result;
         }
         
+        // 请求全屏函数 - 只针对内容区域
+        function requestFullscreen() {
+            // 获取内容区域元素，而不是整个文档
+            const element = document.querySelector('.wikidot-content');
+            
+            // 尝试请求全屏
+            try {
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                } else if (element.webkitRequestFullscreen) {
+                    element.webkitRequestFullscreen();
+                } else if (element.msRequestFullscreen) {
+                    element.msRequestFullscreen();
+                } else {
+                    console.log('当前浏览器不支持全屏API');
+                    // 如果浏览器不支持全屏API，可以考虑使用其他方式，比如放大内容
+                    element.style.transform = 'scale(1.1)';
+                    element.style.transition = 'transform 0.3s ease';
+                }
+            } catch (error) {
+                console.log('全屏请求失败:', error);
+                // 如果全屏请求失败，可能是因为跨域限制或其他原因
+                // 可以尝试发送消息给父页面，请求父页面帮助实现全屏
+                try {
+                    window.parent.postMessage({ action: 'requestFullscreen' }, '*');
+                } catch (e) {
+                    console.log('无法发送消息到父页面:', e);
+                }
+            }
+        }
+        
+        // 监听全屏变化事件
+        function handleFullscreenChange() {
+            if (document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.msFullscreenElement) {
+                console.log('进入全屏模式');
+                // 可以在这里添加全屏模式下的特殊处理
+            } else {
+                console.log('退出全屏模式');
+                // 可以在这里添加退出全屏模式下的特殊处理
+            }
+        }
+        
+        // 监听全屏变化事件
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
         // 按钮点击事件
         document.getElementById('choice-button').addEventListener('click', function () {
             console.log('用户点击了做出选择按钮');
+            
+            // 请求全屏
+            requestFullscreen();
             
             const contentArea = document.querySelector('.wikidot-content');
             const contentWrapper = document.querySelector('.content-wrapper');
