@@ -454,35 +454,39 @@
         }
         
         // 请求全屏函数 - 只针对内容区域
-        function requestFullscreen() {
-            // 获取内容区域元素，而不是整个文档
-            const element = document.querySelector('.wikidot-content');
-            
-            // 尝试请求全屏
-            try {
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullscreen) {
-                    element.webkitRequestFullscreen();
-                } else if (element.msRequestFullscreen) {
-                    element.msRequestFullscreen();
-                } else {
-                    console.log('当前浏览器不支持全屏API');
-                    // 如果浏览器不支持全屏API，可以考虑使用其他方式，比如放大内容
-                    element.style.transform = 'scale(1.1)';
-                    element.style.transition = 'transform 0.3s ease';
-                }
-            } catch (error) {
-                console.log('全屏请求失败:', error);
-                // 如果全屏请求失败，可能是因为跨域限制或其他原因
-                // 可以尝试发送消息给父页面，请求父页面帮助实现全屏
-                try {
-                    window.parent.postMessage({ action: 'requestFullscreen' }, '*');
-                } catch (e) {
-                    console.log('无法发送消息到父页面:', e);
-                }
-            }
-        }
+        // 按钮点击事件
+document.getElementById('choice-button').addEventListener('click', function () {
+    console.log('用户点击了做出选择按钮');
+    
+    // 向父页面发送全屏请求
+    try {
+        window.parent.postMessage({ action: 'requestFullscreen' }, '*');
+        console.log('已发送全屏请求到父页面');
+    } catch (e) {
+        console.log('无法发送消息到父页面:', e);
+    }
+    
+    const contentArea = document.querySelector('.wikidot-content');
+    const contentWrapper = document.querySelector('.content-wrapper');
+    
+    // 添加渐隐动画类
+    contentArea.classList.add('fade-out');
+    
+    // 监听动画结束事件
+    contentArea.addEventListener('animationend', function handleAnimationEnd() {
+        // 移除事件监听器（防止重复触发）
+        contentArea.removeEventListener('animationend', handleAnimationEnd);
+        
+        // 清空区域内容
+        contentWrapper.innerHTML = '';
+        
+        // 移除动画类（以便下次使用）
+        contentArea.classList.remove('fade-out');
+        
+        // 开始逐段显示内容
+        showContentSections();
+    });
+});
         
         // 监听全屏变化事件
         function handleFullscreenChange() {
