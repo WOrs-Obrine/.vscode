@@ -235,6 +235,35 @@
             pointer-events: none;
         }
         
+        /* 全屏模式下的样式优化 */
+        :fullscreen {
+            background-color: #0d0d0f;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        :-webkit-full-screen {
+            background-color: #0d0d0f;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        :-moz-full-screen {
+            background-color: #0d0d0f;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        :-ms-fullscreen {
+            background-color: #0d0d0f;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
         /* 最终文字容器 */
         .final-text-container {
             width: 100%;
@@ -357,6 +386,28 @@
         // 按钮点击事件
         document.getElementById('choice-button').addEventListener('click', function () {
             console.log('用户点击了做出选择按钮');
+            
+            // 获取当前窗口的顶层元素
+            let fullscreenElement = document.documentElement;
+            
+            // 检查是否在iframe中
+            if (window.self !== window.top) {
+                // 如果在iframe中，尝试获取iframe元素本身
+                // 但由于同源策略限制，我们只能请求当前文档全屏
+                // 这会导致整个浏览器窗口全屏显示iframe内容
+                fullscreenElement = document.documentElement;
+            }
+            
+            // 请求全屏显示
+            if (fullscreenElement.requestFullscreen) {
+                fullscreenElement.requestFullscreen();
+            } else if (fullscreenElement.mozRequestFullScreen) {
+                fullscreenElement.mozRequestFullScreen();
+            } else if (fullscreenElement.webkitRequestFullscreen) {
+                fullscreenElement.webkitRequestFullscreen();
+            } else if (fullscreenElement.msRequestFullscreen) {
+                fullscreenElement.msRequestFullscreen();
+            }
             
             const contentArea = document.querySelector('.wikidot-content');
             const contentWrapper = document.querySelector('.content-wrapper');
